@@ -1,0 +1,38 @@
+FROM ubuntu:18.04
+RUN apt-get update
+RUN apt-get install -y unzip cmake g++ make vim gcc libboost-all-dev git wget
+# install gprc
+RUN apt-get install -y build-essential autoconf libtool pkg-config
+RUN apt-get install -y libgflags-dev libgtest-dev
+RUN apt-get install -y clang-5.0 libc++-dev curl
+RUN apt-get install -y libcurl4-openssl-dev libgflags-dev
+COPY third_party/grpc.tar.gz /root/third_party/
+WORKDIR /root/third_party/
+RUN tar -zxvf grpc.tar.gz && rm -f /root/third_party/grpc.tar.gz
+RUN cd  /root/third_party/grpc && make clean && make -j2 && make install 
+#RUN mkdir -p /root/third_party
+#WORKDIR /root/third_party
+#RUN git clone -b $(curl -L https://grpc.io/release) https://github.com/grpc/grpc
+#WORKDIR /root/third_party/grpc
+#RUN git submodule update --init
+#RUN make -j && make install
+RUN apt-get install -y libgoogle-glog-dev
+RUN apt-get install -y golang automake libtool
+
+# BUILD PROTOBUF
+WORKDIR /root/third_party/grpc/third_party/protobuf
+RUN ./autogen.sh
+RUN make clean
+RUN make -j2
+RUN make install
+
+# install pip and grpc
+RUN apt-get install -y python-pip
+RUN python -m pip install --upgrade pip
+RUN python -m pip install grpcio grpcio-tools
+
+CMD ["/bin/bash"]
+
+
+
+
